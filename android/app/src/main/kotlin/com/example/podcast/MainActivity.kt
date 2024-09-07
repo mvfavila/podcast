@@ -1,4 +1,4 @@
-package com.example.podcast
+package com.cajucast.app
 
 import io.flutter.embedding.android.FlutterActivity
 

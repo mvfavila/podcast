@@ -56,6 +56,10 @@ jobs:
 
       - name: Build APK (Android)
         run: flutter build apk
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
       - name: Upload APK
         uses: actions/upload-artifact@v3

@@ -54,12 +54,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK (Android)
-        run: flutter build apk
+      - name: Set up Java before building APK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
+
+      - name: Build APK (Android)
+        run: flutter build apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v3

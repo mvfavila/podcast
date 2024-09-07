@@ -55,7 +55,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK (Android)
-        run: flutter build apk --no-sound-null-safety --no-shrink
+        run: flutter build apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v3

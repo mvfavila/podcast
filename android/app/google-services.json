@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "90022168326",
+    "project_id": "podcast-4c3cf",
+    "storage_bucket": "podcast-4c3cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90022168326:android:d67002e2539f5cb896c087",
+        "android_client_info": {
+          "package_name": "com.cajucast.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkHlYeWY4flmiIPxJx6xTR_Fs5Utiritw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

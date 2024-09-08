@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -28,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       UserCredential userCredential = await _auth.signInWithCredential(credential);
       return userCredential.user;
     } catch (error) {
-      print("Sign-in failed: $error");
+      // TODO: Handle error (ex.: log error message)
       return null;
     }
   }
@@ -37,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign in"),
+        title: const Text("Sign in"),
       ),
       body: Center(
         child: Column(
@@ -46,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
               onPressed: () async {
                 User? user = await _handleSignIn();
-                if (user != null) {
+                if (user != null && context.mounted) {
                   // Navigate to the next screen (e.g., the home screen)
                   Navigator.pushReplacement(
                     context,
@@ -54,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 }
               },
-              child: Text('Sign in with Google'),
+              child: const Text('Sign in with Google'),
             ),
           ],
         ),
@@ -66,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
 class HomeScreen extends StatelessWidget {
   final User user;
 
-  HomeScreen(this.user);
+  const HomeScreen(this.user, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,14 +77,16 @@ class HomeScreen extends StatelessWidget {
         title: Text('Welcome, ${user.displayName}'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               GoogleSignIn().signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
+              if (context.mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              }
             },
           )
         ],

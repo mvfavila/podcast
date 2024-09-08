@@ -18,6 +18,9 @@ test:
 clean:
 	$(FLUTTER) clean
 
+fix:
+	dart fix --apply
+
 vendor:
 	$(FLUTTER) pub get
 

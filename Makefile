@@ -18,7 +18,7 @@ test:
 clean:
 	$(FLUTTER) clean
 
-get-packages:
+vendor:
 	$(FLUTTER) pub get
 
 format:
@@ -28,7 +28,7 @@ lint:
 	$(FLUTTER) analyze
 
 # Install dependencies
-install-deps: get-packages
+install-deps: vendor
 
 # Run tests and lint checks
 ci-check: lint test

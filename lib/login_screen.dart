@@ -12,12 +12,22 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  bool _isLoading = false;
+  String? _errorMessage;
 
   // Method to handle Google Sign-In
   Future<User?> _handleSignIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;  // Reset error message before sign-in attempt
+    });
+
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
+        setState(() {
+          _isLoading = false;
+        });
         return null; // User aborted the sign-in
       }
 
@@ -28,9 +38,15 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       UserCredential userCredential = await _auth.signInWithCredential(credential);
+      setState(() {
+        _isLoading = false;
+      });
       return userCredential.user;
     } catch (error) {
-      // TODO: Handle error (ex.: log error message)
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to sign in. Please try again later.';  // Display generic error message
+      });
       return null;
     }
   }
@@ -45,19 +61,32 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () async {
-                User? user = await _handleSignIn();
-                if (user != null && context.mounted) {
-                  // Navigate to the next screen (e.g., the home screen)
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen(user)),
-                  );
-                }
-              },
-              child: const Text('Sign in with Google'),
-            ),
+            if (_isLoading)
+              const CircularProgressIndicator()  // Show loading spinner while sign-in is in progress
+            else ...[
+              ElevatedButton(
+                onPressed: () async {
+                  User? user = await _handleSignIn();
+                  if (user != null && context.mounted) {
+                    // Navigate to the next screen (e.g., the home screen)
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen(user)),
+                    );
+                  }
+                },
+                child: const Text('Sign in with Google'),
+              ),
+              if (_errorMessage != null)  // Display error message if sign-in failed
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+            ],
           ],
         ),
       ),

@@ -36,3 +36,18 @@ This is a mobile app built using Flutter that allows users to search for, subscr
 - **Firebase**: 
   - **Firebase Authentication**: For managing user sign-ins and sessions.
   - **Firebase Firestore
+
+# How to section
+
+## How to debug on device
+
+1. Use a USB cable to connect the mobile to the computer.
+2. On your mobile, go to Settings > Wi-Fi and tap on the Wi-Fi network you're connected to.
+3. Note the IP address of your device (something like 192.168.x.x).
+4. In your terminal, run the following command:
+    > adb tcpip 5555
+
+    This sets your Android device to listen for ADB connections over Wi-Fi on port 5555.
+5. Now you can disconnect the USB cable from your computer.
+6. In your terminal, run:
+    > adb connect <your_device_ip>:5555

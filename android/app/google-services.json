@@ -12,7 +12,20 @@
           "package_name": "com.cajucast.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "90022168326-f1t2shj5u7gn1eoaukses3k98qgq4nig.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cajucast.app",
+            "certificate_hash": "728313967c90fc32ebace1e29f4bf954a602f776"
+          }
+        },
+        {
+          "client_id": "90022168326-kk0nulak83lfjaul66mmhaed82qi95kd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCkHlYeWY4flmiIPxJx6xTR_Fs5Utiritw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "90022168326-kk0nulak83lfjaul66mmhaed82qi95kd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "90022168326-djb94u5k0nrcr2bro68sveo605n6vq1h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.podcast"
+              }
+            }
+          ]
         }
       }
     }

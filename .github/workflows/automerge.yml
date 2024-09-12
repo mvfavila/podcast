@@ -13,10 +13,10 @@ jobs:
     if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Automerge Dependabot PRs
-      uses: "pascalgn/automerge-action@v0.15.3"
+      uses: "pascalgn/automerge-action@v0.16.3"
       with:
         merge-method: "merge"
         commit-message: "auto-merge"

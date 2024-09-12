@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart'; // Import Crashlytics
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,11 +17,11 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Method to handle Google Sign-In
+  // Method to handle Google Sign-In with enhanced logging to Firebase Crashlytics
   Future<User?> _handleSignIn() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;  // Reset error message before sign-in attempt
+      _errorMessage = null;
     });
 
     try {
@@ -42,13 +44,39 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
       return userCredential.user;
-    } catch (error) {
+    } on FirebaseAuthException catch (e, stackTrace) {
+      _logFirebaseAuthError(e, stackTrace);  // Log Firebase-specific errors
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to sign in. Please try again later.';  // Display generic error message
+        _errorMessage = handleFirebaseAuthError(e);  
       });
-      return null;
+    } on SocketException catch (e, stackTrace) {
+      _logError('Network error', e, stackTrace);  // Log network errors
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Network error. Please check your internet connection and try again.';
+      });
+    } catch (error, stackTrace) {
+      _logError('Unexpected error during sign-in', error, stackTrace);  // Log any other errors
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Something went wrong. Please try again later.';
+      });
     }
+
+    return null;
+  }
+
+  // Log Firebase-specific authentication errors to Crashlytics
+  void _logFirebaseAuthError(FirebaseAuthException e, StackTrace stackTrace) {
+    // Log to Firebase Crashlytics
+    FirebaseCrashlytics.instance.recordError(e, stackTrace, reason: 'Firebase Auth Error: ${e.code}');
+  }
+
+  // General error logging function
+  void _logError(String message, dynamic error, StackTrace stackTrace) {
+    // Log to Firebase Crashlytics
+    FirebaseCrashlytics.instance.recordError(error, stackTrace, reason: message);
   }
 
   @override
@@ -62,13 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if (_isLoading)
-              const CircularProgressIndicator()  // Show loading spinner while sign-in is in progress
+              const CircularProgressIndicator()
             else ...[
               ElevatedButton(
                 onPressed: () async {
                   User? user = await _handleSignIn();
                   if (user != null && context.mounted) {
-                    // Navigate to the next screen (e.g., the home screen)
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => HomeScreen(user)),
@@ -77,13 +104,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: const Text('Sign in with Google'),
               ),
-              if (_errorMessage != null)  // Display error message if sign-in failed
+              if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      if (_errorMessage != 'Something went wrong. Please try again later.')
+                        ElevatedButton(
+                          onPressed: () {
+                            _handleSignIn();
+                          },
+                          child: const Text('Retry'),
+                        )
+                    ],
                   ),
                 ),
             ],
@@ -91,6 +130,21 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+}
+
+String handleFirebaseAuthError(FirebaseAuthException e) {
+  switch (e.code) {
+    case 'account-exists-with-different-credential':
+    case 'invalid-credential':
+    case 'wrong-password':
+    case 'user-disabled':
+    case 'user-not-found':
+      return 'Incorrect user/password. Please try again.';
+    case 'operation-not-allowed':
+      return 'Sign-in with Google is not enabled.';
+    default:
+      return 'An unknown error occurred. Please try again later.';
   }
 }
 

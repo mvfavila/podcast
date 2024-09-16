@@ -61,6 +61,9 @@ jobs:
 
       - name: Build APK (Android)
         run: flutter build apk
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

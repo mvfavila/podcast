@@ -23,7 +23,7 @@ class SpotifyService {
       final data = jsonDecode(response.body);
       return data['access_token'];
     } else {
-      print('Failed to get access token');
+      // TODO: log error message
       return null;
     }
   }
@@ -43,7 +43,7 @@ class SpotifyService {
       final data = jsonDecode(response.body);
       return data['shows']['items']; // Returns list of podcast shows
     } else {
-      print('Failed to fetch podcasts');
+      // TODO: log error message
       return null;
     }
   }

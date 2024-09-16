@@ -6,10 +6,10 @@ class PodcastSearchScreen extends StatefulWidget {
   const PodcastSearchScreen({super.key});
 
   @override
-  _PodcastSearchScreenState createState() => _PodcastSearchScreenState();
+  PodcastSearchScreenState createState() => PodcastSearchScreenState();
 }
 
-class _PodcastSearchScreenState extends State<PodcastSearchScreen> {
+class PodcastSearchScreenState extends State<PodcastSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   List<dynamic>? _podcasts;
   bool _isLoading = false;

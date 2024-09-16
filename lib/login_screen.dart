@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart'; // Import Crashlytics
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
+import 'package:podcast/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -145,38 +147,5 @@ String handleFirebaseAuthError(FirebaseAuthException e) {
       return 'Sign-in with Google is not enabled.';
     default:
       return 'An unknown error occurred. Please try again later.';
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  final User user;
-
-  const HomeScreen(this.user, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome, ${user.displayName}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              GoogleSignIn().signOut();
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
-            },
-          )
-        ],
-      ),
-      body: Center(
-        child: Text('Welcome to the podcast client app, ${user.displayName}'),
-      ),
-    );
   }
 }

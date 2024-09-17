@@ -1,6 +1,8 @@
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 
-import 'package:podcast/vendor/spotify_service.dart';
+import '../../vendor/spotify_service.dart';
+import '../../vendor/remote_config_service.dart';
 
 class PodcastSearchScreen extends StatefulWidget {
   const PodcastSearchScreen({super.key});
@@ -19,7 +21,10 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
       _isLoading = true;
     });
 
-    SpotifyService spotifyService = SpotifyService();
+    final remoteConfig = FirebaseRemoteConfig.instance;
+    final remoteConfigService = RemoteConfigService(remoteConfig);
+
+    SpotifyService spotifyService = SpotifyService(remoteConfigService);
     final podcasts = await spotifyService.searchPodcasts(_controller.text);
 
     setState(() {

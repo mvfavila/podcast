@@ -1,12 +1,19 @@
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:podcast/vendor/remote_config_service.dart';
+
 class SpotifyService {
-  final String clientId = dotenv.env['SPOTIFY_CLIENT_ID']!;
-  final String clientSecret = dotenv.env['SPOTIFY_CLIENT_SECRET']!;
+  final RemoteConfigService _remoteConfigService;
+
+  SpotifyService(this._remoteConfigService) {
+    _remoteConfigService.initialize();
+  }
 
   Future<String?> getAccessToken() async {
+    final clientId = _remoteConfigService.getSpotifyClientId();
+    final clientSecret = _remoteConfigService.getSpotifyClientSecret();
+
     const String authUrl = 'https://accounts.spotify.com/api/token';
     final String credentials = base64Encode(utf8.encode('$clientId:$clientSecret'));
 

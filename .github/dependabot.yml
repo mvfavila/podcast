@@ -12,7 +12,7 @@ updates:
     groups:
       firebase-dependencies:
         patterns:
-          - "^firebase.*"
+          - "^firebase*"
   
   - package-ecosystem: "github-actions"
     directory: "/"

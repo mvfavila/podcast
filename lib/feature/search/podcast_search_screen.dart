@@ -26,8 +26,7 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
       _isLoading = true;
     });
 
-    final remoteConfig = FirebaseRemoteConfig.instance;
-    final remoteConfigService = RemoteConfigService(remoteConfig);
+    final remoteConfigService = RemoteConfigService(FirebaseRemoteConfig.instance);
     final spotifyService = SpotifyService(remoteConfigService);
     final podcasts = await spotifyService.searchPodcasts(_controller.text);
 
@@ -50,6 +49,18 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Subscribed to ${podcast['name']}')));
+    }
+  }
+
+  Future<void> _unsubscribeFromPodcast(String podcastId) async {
+    if (_user == null) return;
+
+    final userSubscriptions = _firestore.collection('users').doc(_user!.uid).collection('subscriptions');
+
+    await userSubscriptions.doc(podcastId).delete();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unsubscribed')));
     }
   }
 
@@ -99,7 +110,10 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
                                 ? Image.network(podcast['images'][0]['url'])
                                 : null,
                             trailing: isSubscribed
-                                ? const Text('Subscribed', style: TextStyle(color: Colors.green))
+                                ? ElevatedButton(
+                                    onPressed: () => _unsubscribeFromPodcast(podcast['id']),
+                                    child: const Text('Unsubscribe'),
+                                  )
                                 : ElevatedButton(
                                     onPressed: () => _subscribeToPodcast(podcast),
                                     child: const Text('Subscribe'),

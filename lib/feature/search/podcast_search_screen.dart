@@ -40,7 +40,7 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
   Future<void> _subscribeToPodcast(Map<String, dynamic> podcast) async {
     if (_user == null) return;
 
-    final userSubscriptions = _firestore.collection('users').doc(_user!.uid).collection('subscriptions');
+    final userSubscriptions = _firestore.collection('users').doc(_user.uid).collection('subscriptions');
 
     await userSubscriptions.doc(podcast['id']).set({
       'name': podcast['name'],
@@ -56,7 +56,7 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
   Future<bool> _isSubscribed(String podcastId) async {
     if (_user == null) return false;
 
-    final subscription = await _firestore.collection('users').doc(_user!.uid).collection('subscriptions').doc(podcastId).get();
+    final subscription = await _firestore.collection('users').doc(_user.uid).collection('subscriptions').doc(podcastId).get();
     return subscription.exists;
   }
 

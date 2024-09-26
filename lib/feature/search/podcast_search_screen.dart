@@ -55,7 +55,7 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
   Future<void> _unsubscribeFromPodcast(String podcastId) async {
     if (_user == null) return;
 
-    final userSubscriptions = _firestore.collection('users').doc(_user!.uid).collection('subscriptions');
+    final userSubscriptions = _firestore.collection('users').doc(_user.uid).collection('subscriptions');
 
     await userSubscriptions.doc(podcastId).delete();
 

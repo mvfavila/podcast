@@ -2,9 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-
-import '../../vendor/spotify_service.dart';
-import '../../vendor/remote_config_service.dart';
+import 'package:podcast/vendor/spotify_service.dart';
+import 'package:podcast/vendor/remote_config_service.dart';
 
 class PodcastSearchScreen extends StatefulWidget {
   const PodcastSearchScreen({super.key});
@@ -17,9 +16,33 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   List<dynamic>? _podcasts;
   bool _isLoading = false;
-
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final User? _user = FirebaseAuth.instance.currentUser;
+  final Map<String, bool> _subscriptions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserSubscriptions();
+  }
+
+  Future<void> _fetchUserSubscriptions() async {
+    if (_user == null) return;
+
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(_user.uid)
+        .collection('subscriptions')
+        .get();
+
+    final subscribedPodcasts = snapshot.docs.map((doc) => doc.id).toList();
+
+    setState(() {
+      for (var podcast in subscribedPodcasts) {
+        _subscriptions[podcast] = true;
+      }
+    });
+  }
 
   void _searchPodcasts() async {
     setState(() {
@@ -37,27 +60,38 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
     });
   }
 
-  Future<void> _subscribeToPodcast(Map<String, dynamic> podcast) async {
+  Future<void> _subscribeToPodcast(dynamic podcast) async {
     if (_user == null) return;
 
-    final userSubscriptions = _firestore.collection('users').doc(_user.uid).collection('subscriptions');
-
-    await userSubscriptions.doc(podcast['id']).set({
+    await _firestore
+        .collection('users')
+        .doc(_user.uid)
+        .collection('subscriptions')
+        .doc(podcast['id'])
+        .set({
       'name': podcast['name'],
       'publisher': podcast['publisher'],
       'image_url': podcast['images'].isNotEmpty ? podcast['images'][0]['url'] : null,
     });
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Subscribed to ${podcast['name']}')));
-    }
+    setState(() {
+      _subscriptions[podcast['id']] = true;  // Update the local state
+    });
   }
 
-  Future<bool> _isSubscribed(String podcastId) async {
-    if (_user == null) return false;
+  Future<void> _unsubscribeFromPodcast(dynamic podcast) async {
+    if (_user == null) return;
 
-    final subscription = await _firestore.collection('users').doc(_user.uid).collection('subscriptions').doc(podcastId).get();
-    return subscription.exists;
+    await _firestore
+        .collection('users')
+        .doc(_user.uid)
+        .collection('subscriptions')
+        .doc(podcast['id'])
+        .delete();
+
+    setState(() {
+      _subscriptions[podcast['id']] = false;  // Update the local state
+    });
   }
 
   @override
@@ -88,24 +122,24 @@ class PodcastSearchScreenState extends State<PodcastSearchScreen> {
                     itemCount: _podcasts!.length,
                     itemBuilder: (context, index) {
                       final podcast = _podcasts![index];
-                      return FutureBuilder<bool>(
-                        future: _isSubscribed(podcast['id']),
-                        builder: (context, snapshot) {
-                          final isSubscribed = snapshot.data ?? false;
-                          return ListTile(
-                            title: Text(podcast['name']),
-                            subtitle: Text(podcast['publisher']),
-                            leading: podcast['images'].isNotEmpty
-                                ? Image.network(podcast['images'][0]['url'])
-                                : null,
-                            trailing: isSubscribed
-                                ? const Text('Subscribed', style: TextStyle(color: Colors.green))
-                                : ElevatedButton(
-                                    onPressed: () => _subscribeToPodcast(podcast),
-                                    child: const Text('Subscribe'),
-                                  ),
-                          );
-                        },
+                      final isSubscribed = _subscriptions[podcast['id']] ?? false;
+
+                      return ListTile(
+                        title: Text(podcast['name']),
+                        subtitle: Text(podcast['publisher']),
+                        leading: podcast['images'].isNotEmpty
+                            ? Image.network(podcast['images'][0]['url'])
+                            : null,
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            if (isSubscribed) {
+                              _unsubscribeFromPodcast(podcast);
+                            } else {
+                              _subscribeToPodcast(podcast);
+                            }
+                          },
+                          child: Text(isSubscribed ? 'Unsubscribe' : 'Subscribe'),
+                        ),
                       );
                     },
                   ),

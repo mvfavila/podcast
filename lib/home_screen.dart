@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:podcast/feature/search/podcast_search_screen.dart';
+import 'package:podcast/feature/view/view_subscription_screen.dart';
 import 'package:podcast/login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -39,13 +40,22 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigate to the PodcastSearchScreen when the button is pressed
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PodcastSearchScreen()),
                 );
               },
               child: const Text('Search Podcasts'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ViewSubscriptionsScreen()),
+                );
+              },
+              child: const Text('View Subscriptions'),
             ),
           ],
         ),

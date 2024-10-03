@@ -54,4 +54,24 @@ class SpotifyService {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> getPodcastDetails(String podcastId) async {
+    final accessToken = await getAccessToken();
+    if (accessToken == null) return null;
+
+    final response = await http.get(
+      Uri.parse('https://api.spotify.com/v1/shows/$podcastId?market=BR'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data; // Returns podcast details including episodes
+    } else {
+      // TODO: log error message
+      return null;
+    }
+  }
 }

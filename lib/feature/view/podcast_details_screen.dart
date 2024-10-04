@@ -14,8 +14,11 @@ class PodcastDetailsScreen extends StatefulWidget {
 }
 
 class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
+  final descriptionShortenedLength = 150;
+
   Map<String, dynamic>? _podcastDetails;
   bool _isLoading = true;
+  bool _isDescriptionExpanded = false;
 
   @override
   void initState() {
@@ -64,10 +67,7 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                   ),
                   const SizedBox(height: 20),
                   if (_podcastDetails != null)
-                    Text(
-                      _podcastDetails!['description'] ?? 'No description available',
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    _buildDescriptionSection(_podcastDetails!['description']),
                   const SizedBox(height: 20),
                   const Text(
                     'Episodes:',
@@ -93,6 +93,38 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+
+
+  Widget _buildDescriptionSection(String description) {
+    // Check if description needs to be shortened
+    bool isLongDescription = description.length > descriptionShortenedLength;
+    String displayDescription = _isDescriptionExpanded || !isLongDescription
+        ? description
+        : '${description.substring(0, descriptionShortenedLength)}...';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          displayDescription,
+          style: const TextStyle(fontSize: 14),
+        ),
+        if (isLongDescription)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _isDescriptionExpanded = !_isDescriptionExpanded;
+              });
+            },
+            child: Text(
+              _isDescriptionExpanded ? 'Show less' : 'Show more',
+              style: const TextStyle(color: Colors.blue),
+            ),
+          ),
+      ],
     );
   }
 }

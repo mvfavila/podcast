@@ -55,17 +55,12 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                     Center(
                       child: Image.network(widget.podcast['image_url'], height: 180, width: 180),
                     ),
-                  const SizedBox(height: 20),
-                  Text(
-                    widget.podcast['name'],
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
                   const SizedBox(height: 10),
                   Text(
                     'Publisher: ${widget.podcast['publisher']}',
                     style: const TextStyle(fontSize: 16),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   if (_podcastDetails != null)
                     _buildDescriptionSection(_podcastDetails!['description']),
                   const SizedBox(height: 20),
@@ -80,6 +75,14 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                             itemBuilder: (context, index) {
                               final episode = _podcastDetails!['episodes']['items'][index];
                               return ListTile(
+                                leading: episode['images'].isNotEmpty
+                                    ? Image.network(
+                                        episode['images'][0]['url'],
+                                        height: 90,
+                                        width: 120,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : const Icon(Icons.image_not_supported),
                                 title: Text(episode['name']),
                                 subtitle: Text(episode['release_date']),
                                 onTap: () {

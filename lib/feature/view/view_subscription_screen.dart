@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'package:podcast/feature/view/podcast_details_screen.dart';
+
 class ViewSubscriptionsScreen extends StatefulWidget {
   const ViewSubscriptionsScreen({super.key});
 
@@ -86,6 +88,14 @@ class ViewSubscriptionsScreenState extends State<ViewSubscriptionsScreen> {
                         },
                         child: const Text('Unsubscribe'),
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PodcastDetailsScreen(podcast: podcast),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

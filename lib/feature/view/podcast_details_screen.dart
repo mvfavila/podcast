@@ -99,32 +99,35 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
 
 
   Widget _buildDescriptionSection(String description) {
-    // Check if description needs to be shortened
-    bool isLongDescription = description.length > descriptionShortenedLength;
+    bool isLongDescription = description.length > 150;
     String displayDescription = _isDescriptionExpanded || !isLongDescription
         ? description
-        : '${description.substring(0, descriptionShortenedLength)}...';
+        : '${description.substring(0, 150)}... ';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          displayDescription,
-          style: const TextStyle(fontSize: 14),
-        ),
-        if (isLongDescription)
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _isDescriptionExpanded = !_isDescriptionExpanded;
-              });
-            },
-            child: Text(
-              _isDescriptionExpanded ? 'Show less' : 'Show more',
-              style: const TextStyle(color: Colors.blue),
-            ),
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(fontSize: 14, color: Colors.black),
+        children: [
+          TextSpan(
+            text: displayDescription,
           ),
-      ],
+          if (isLongDescription)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isDescriptionExpanded = !_isDescriptionExpanded;
+                  });
+                },
+                child: Text(
+                  _isDescriptionExpanded ? ' Show less' : ' Show more',
+                  style: const TextStyle(color: Colors.blue),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

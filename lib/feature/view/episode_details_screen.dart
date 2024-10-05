@@ -11,7 +11,7 @@ class EpisodeDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(episode['name']),
       ),
-      body: Padding(
+      body: SingleChildScrollView( // Wrap content in SingleChildScrollView to avoid overflow
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

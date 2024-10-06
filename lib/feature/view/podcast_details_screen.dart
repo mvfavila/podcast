@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
+import 'package:podcast/feature/view/episode_details_screen.dart';
 import 'package:podcast/vendor/remote_config_service.dart';
 import 'package:podcast/vendor/spotify_service.dart';
 
@@ -86,7 +87,13 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                                 title: Text(episode['name']),
                                 subtitle: Text(episode['release_date']),
                                 onTap: () {
-                                  // Handle episode selection, e.g., play episode
+                                  // Navigate to EpisodeDetailsScreen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EpisodeDetailsScreen(episode: episode),
+                                    ),
+                                  );
                                 },
                               );
                             },

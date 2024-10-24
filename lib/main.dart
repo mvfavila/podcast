@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:podcast/feature/auth_check/auth_check.dart';
+import 'package:podcast/feature/player/session.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -12,6 +13,8 @@ void main() async {
 
   // Pass all uncaught errors from the framework to Crashlytics.
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+  await initAudioSession();
 
   runApp(const MyApp());
 }

@@ -48,7 +48,7 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
     }
 
     // Check played and playlisted episodes in Firestore
-    // await _updateEpisodeStates(episodes);
+    await _updateEpisodeStates(episodes);
 
     setState(() {
       episodes.sort((a, b) {

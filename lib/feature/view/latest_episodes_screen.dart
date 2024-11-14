@@ -19,7 +19,7 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<EpisodeTile> _episodeTiles = [];
+  List<Episode> _episodes = [];
   User? _currentUser;
 
   @override
@@ -32,7 +32,6 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
   Future<void> _syncAndFetchEpisodes() async {
     if (_currentUser == null) return;
 
-    // Fetch user subscriptions from Firestore
     final subscriptions = await _firestore
         .collection('users')
         .doc(_currentUser!.uid)
@@ -47,7 +46,6 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
       episodes.addAll(newEpisodes);
     }
 
-    // Check played and playlisted episodes in Firestore
     await _updateEpisodeStates(episodes);
 
     setState(() {
@@ -59,7 +57,7 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
         return b.publicationDate!.compareTo(a.publicationDate!);
       });
 
-      _episodeTiles = episodes.map((e) => EpisodeTile.fromEpisode(e, _toggleInPlaylist)).toList();
+      _episodes = episodes;
     });
   }
 
@@ -119,7 +117,6 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
 
   Future<void> _toggleInPlaylist(Episode episode) async {
     final userId = _currentUser!.uid;
-
     final playlistRef = _firestore
         .collection('users')
         .doc(userId)
@@ -146,9 +143,14 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
       body: RefreshIndicator(
         onRefresh: _syncAndFetchEpisodes,
         child: ListView.builder(
-          itemCount: _episodeTiles.length,
+          itemCount: _episodes.length,
           itemBuilder: (context, index) {
-            return _episodeTiles[index];
+            final episode = _episodes[index];
+            return EpisodeTile(
+              episode: episode,
+              backupImageUrl: 'path_to_default_image', // Replace with your backup image URL
+              onToggleInPlaylist: _toggleInPlaylist,
+            );
           },
         ),
       ),

@@ -21,6 +21,7 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
 
   List<Episode> _episodes = [];
   User? _currentUser;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -32,33 +33,43 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
   Future<void> _syncAndFetchEpisodes() async {
     if (_currentUser == null) return;
 
-    final subscriptions = await _firestore
-        .collection('users')
-        .doc(_currentUser!.uid)
-        .collection('subscriptions')
-        .get();
-
-    List<Episode> episodes = [];
-
-    for (var doc in subscriptions.docs) {
-      final podcastId = doc.id;
-      final newEpisodes = await _fetchEpisodesFromSpotify(podcastId);
-      episodes.addAll(newEpisodes);
-    }
-
-    await _updateEpisodeStates(episodes);
-
     setState(() {
-      episodes.sort((a, b) {
-        if (a.publicationDate == null && b.publicationDate == null) return 0;
-        if (a.publicationDate == null) return -1;
-        if (b.publicationDate == null) return 1;
-        
-        return b.publicationDate!.compareTo(a.publicationDate!);
-      });
-
-      _episodes = episodes;
+      _isLoading = true;
     });
+
+    try {
+      final subscriptions = await _firestore
+          .collection('users')
+          .doc(_currentUser!.uid)
+          .collection('subscriptions')
+          .get();
+
+      List<Episode> episodes = [];
+
+      for (var doc in subscriptions.docs) {
+        final podcastId = doc.id;
+        final newEpisodes = await _fetchEpisodesFromSpotify(podcastId);
+        episodes.addAll(newEpisodes);
+      }
+
+      await _updateEpisodeStates(episodes);
+
+      setState(() {
+        episodes.sort((a, b) {
+          if (a.publicationDate == null && b.publicationDate == null) return 0;
+          if (a.publicationDate == null) return -1;
+          if (b.publicationDate == null) return 1;
+          
+          return b.publicationDate!.compareTo(a.publicationDate!);
+        });
+
+        _episodes = episodes;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<List<Episode>> _fetchEpisodesFromSpotify(String podcastId) async {
@@ -140,20 +151,22 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Latest Episodes')),
-      body: RefreshIndicator(
-        onRefresh: _syncAndFetchEpisodes,
-        child: ListView.builder(
-          itemCount: _episodes.length,
-          itemBuilder: (context, index) {
-            final episode = _episodes[index];
-            return EpisodeTile(
-              episode: episode,
-              backupImageUrl: 'path_to_default_image', // Replace with your backup image URL
-              onToggleInPlaylist: _toggleInPlaylist,
-            );
-          },
-        ),
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())  // Show loading indicator
+          : RefreshIndicator(
+              onRefresh: _syncAndFetchEpisodes,
+              child: ListView.builder(
+                itemCount: _episodes.length,
+                itemBuilder: (context, index) {
+                  final episode = _episodes[index];
+                  return EpisodeTile(
+                    episode: episode,
+                    backupImageUrl: 'path_to_default_image', // Replace with your backup image URL
+                    onToggleInPlaylist: _toggleInPlaylist,
+                  );
+                },
+              ),
+            ),
     );
   }
 }

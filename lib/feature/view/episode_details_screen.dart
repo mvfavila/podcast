@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:podcast/data_model/episode.dart';
+
 class EpisodeDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> episode;
+  final Episode episode;
 
   const EpisodeDetailsScreen({super.key, required this.episode});
 
@@ -9,25 +11,24 @@ class EpisodeDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(episode['name']),
+        title: Text(episode.title),
       ),
       body: SingleChildScrollView( // Wrap content in SingleChildScrollView to avoid overflow
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (episode['images'] != null && episode['images'].isNotEmpty)
-              Center(
-                child: Image.network(episode['images'][0]['url'], height: 200, width: 200),
-              ),
+            Center(
+              child: Image.network(episode.imageUrl, height: 200, width: 200),
+            ),
             const SizedBox(height: 20),
             Text(
-              episode['name'],
+              episode.title,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'Release Date: ${episode['release_date']}',
+              'Release Date: ${episode.publicationDate.toString()}',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 20),
@@ -37,7 +38,7 @@ class EpisodeDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              episode['description'] ?? 'No description available',
+              episode.description,
               style: const TextStyle(fontSize: 14),
             ),
           ],

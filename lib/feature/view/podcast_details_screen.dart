@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/material.dart';
 
-import 'package:podcast/feature/view/episode_details_screen.dart';
+import 'package:podcast/data_model/episode.dart';
+import 'package:podcast/feature/view/building_blocks/episode_tile.dart';
 import 'package:podcast/vendor/remote_config_service.dart';
 import 'package:podcast/vendor/spotify_service.dart';
 
@@ -15,15 +18,19 @@ class PodcastDetailsScreen extends StatefulWidget {
 }
 
 class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final descriptionShortenedLength = 150;
 
   Map<String, dynamic>? _podcastDetails;
   bool _isLoading = true;
   bool _isDescriptionExpanded = false;
+  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
+    _currentUser = _auth.currentUser;
     _fetchPodcastDetails();
   }
 
@@ -48,7 +55,7 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(6.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -75,27 +82,7 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                             itemCount: _podcastDetails!['episodes']['items'].length,
                             itemBuilder: (context, index) {
                               final episode = _podcastDetails!['episodes']['items'][index];
-                              return ListTile(
-                                leading: episode['images'].isNotEmpty
-                                    ? Image.network(
-                                        episode['images'][0]['url'],
-                                        height: 90,
-                                        width: 120,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : const Icon(Icons.image_not_supported),
-                                title: Text(episode['name']),
-                                subtitle: Text(episode['release_date']),
-                                onTap: () {
-                                  // Navigate to EpisodeDetailsScreen
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EpisodeDetailsScreen(episode: episode),
-                                    ),
-                                  );
-                                },
-                              );
+                              return EpisodeTile(episode: Episode.fromJson(episode), backupImageUrl: widget.podcast['image_url'], onToggleInPlaylist: _toggleInPlaylist);
                             },
                           )
                         : const Text('No episodes available'),
@@ -104,6 +91,28 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
               ),
             ),
     );
+  }
+
+  Future<void> _toggleInPlaylist(Episode episode) async {
+    final userId = _currentUser!.uid;
+
+    final playlistRef = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('playlist')
+        .doc(episode.id);
+
+    setState(() {
+      episode.isInPlaylist = !episode.isInPlaylist;
+    });
+
+    if (episode.isInPlaylist) {
+      await playlistRef.set({
+        'title': episode.title,
+      });
+    } else {
+      await playlistRef.delete();
+    }
   }
 
 

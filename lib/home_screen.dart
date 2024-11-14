@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:podcast/feature/search/podcast_search_screen.dart';
-import 'package:podcast/feature/view/new_episodes_screen.dart';
+import 'package:podcast/feature/view/latest_episodes_screen.dart';
 import 'package:podcast/feature/view/view_subscription_screen.dart';
 import 'package:podcast/login_screen.dart';
 
@@ -63,7 +63,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const NewEpisodesScreen()),
+                  MaterialPageRoute(builder: (context) => const LatestEpisodesScreen()),
                 );
               },
               child: const Text('Latest episodes'),

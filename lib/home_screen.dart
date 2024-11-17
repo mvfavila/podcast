@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:podcast/feature/search/podcast_search_screen.dart';
 import 'package:podcast/feature/view/latest_episodes_screen.dart';
+import 'package:podcast/feature/view/playlist_screen.dart';
 import 'package:podcast/feature/view/view_subscription_screen.dart';
 import 'package:podcast/login_screen.dart';
 
@@ -67,6 +68,16 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text('Latest episodes'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PlaylistScreen()),
+                );
+              },
+              child: const Text('Playlist'),
             ),
           ],
         ),

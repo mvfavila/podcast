@@ -25,12 +25,10 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
   Map<String, dynamic>? _podcastDetails;
   bool _isLoading = true;
   bool _isDescriptionExpanded = false;
-  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _currentUser = _auth.currentUser;
     _fetchPodcastDetails();
   }
 

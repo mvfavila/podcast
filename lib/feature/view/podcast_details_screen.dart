@@ -82,7 +82,7 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                             itemCount: _podcastDetails!['episodes']['items'].length,
                             itemBuilder: (context, index) {
                               final episode = _podcastDetails!['episodes']['items'][index];
-                              return EpisodeTile(episode: Episode.fromJson(episode), backupImageUrl: widget.podcast['image_url'], onToggleInPlaylist: _toggleInPlaylist);
+                              return EpisodeTile(episode: Episode.fromJson(episode['id'], episode), backupImageUrl: widget.podcast['image_url'], onToggleInPlaylist: _toggleInPlaylist);
                             },
                           )
                         : const Text('No episodes available'),
@@ -108,7 +108,7 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
 
     if (episode.isInPlaylist) {
       await playlistRef.set({
-        'title': episode.title,
+        'title': episode.name,
       });
     } else {
       await playlistRef.delete();

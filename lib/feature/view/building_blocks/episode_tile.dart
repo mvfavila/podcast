@@ -22,12 +22,12 @@ class EpisodeTile extends StatelessWidget {
         fit: BoxFit.cover,
       ),
       title: Text(
-        episode.title,
+        episode.name,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        episode.publicationDate.toString(),
+        episode.releaseDate.toString(),
         style: TextStyle(fontSize: 12),
       ),
       trailing: IconButton(

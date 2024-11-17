@@ -56,11 +56,11 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
 
       setState(() {
         episodes.sort((a, b) {
-          if (a.publicationDate == null && b.publicationDate == null) return 0;
-          if (a.publicationDate == null) return -1;
-          if (b.publicationDate == null) return 1;
+          if (a.releaseDate == null && b.releaseDate == null) return 0;
+          if (a.releaseDate == null) return -1;
+          if (b.releaseDate == null) return 1;
           
-          return b.publicationDate!.compareTo(a.publicationDate!);
+          return b.releaseDate!.compareTo(a.releaseDate!);
         });
 
         _episodes = episodes;
@@ -89,9 +89,9 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
     episodeData['items'].forEach((item) {
       result.add(Episode(
         id: item['id'],
-        title: item['name'],
+        name: item['name'],
         description: item['description'],
-        publicationDate: DateTime.parse(item['release_date']),
+        releaseDate: DateTime.parse(item['release_date']),
         imageUrl: item['images'][0]['url'],
       ));
     });
@@ -139,9 +139,7 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
     });
 
     if (episode.isInPlaylist) {
-      await playlistRef.set({
-        'title': episode.title,
-      });
+      await playlistRef.set(episode.toJson());
     } else {
       await playlistRef.delete();
     }

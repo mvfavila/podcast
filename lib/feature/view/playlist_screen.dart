@@ -38,6 +38,7 @@ class PlaylistScreenState extends State<PlaylistScreen> {
         .collection('users')
         .doc(currentUser.uid)
         .collection('playlist')
+        .orderBy('order')
         .get();
 
     final playedSnapshot = await _firestore
@@ -61,27 +62,32 @@ class PlaylistScreenState extends State<PlaylistScreen> {
     });
   }
 
-  void _reorderPlaylist(int oldIndex, int newIndex) {
+  void _reorderPlaylist(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex--; // Account for reordering behavior
+
     setState(() {
-      if (newIndex > oldIndex) newIndex -= 1;
-      final item = _playlist.removeAt(oldIndex);
-      _playlist.insert(newIndex, item);
+      final episode = _playlist.removeAt(oldIndex);
+      _playlist.insert(newIndex, episode);
     });
-    _updatePlaylistOrderInFirestore();
-  }
 
-  Future<void> _updatePlaylistOrderInFirestore() async {
-    final currentUser = _auth.currentUser;
-    if (currentUser == null) return;
-
-    final playlistRef = _firestore
-        .collection('users')
-        .doc(currentUser.uid)
-        .collection('playlist');
+    // Update order in Firestore
+    final userId = _auth.currentUser!.uid;
+    final batch = _firestore.batch();
 
     for (int i = 0; i < _playlist.length; i++) {
-      await playlistRef.doc(_playlist[i].id).update({'order': i});
+      final episode = _playlist[i];
+      episode.order = i + 1;
+
+      final docRef = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlist')
+          .doc(episode.id);
+
+      batch.update(docRef, {'order': episode.order});
     }
+
+    await batch.commit();
   }
 
   Future<void> _removeFromPlaylist(Episode episode) async {

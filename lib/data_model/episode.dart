@@ -5,6 +5,7 @@ class Episode {
   final DateTime? releaseDate;
   final String imageUrl;
   final int? durationMs;
+  int? order;
   bool isPlayed;
   bool isInPlaylist;
   bool isDownloaded;
@@ -15,6 +16,7 @@ class Episode {
     required this.description,
     required this.releaseDate,
     required this.imageUrl,
+    this.order,
     this.durationMs,
     this.isPlayed = false,
     this.isInPlaylist = false,
@@ -29,6 +31,10 @@ class Episode {
       releaseDate: json['release_date'] == null ? null : DateTime.parse(json['release_date']),
       imageUrl: getCoverImage(json),
       durationMs: json['duration_ms'],
+      isPlayed: json['is_played'] ?? false,
+      isInPlaylist: json['is_in_playlist'] ?? false,
+      isDownloaded: json['is_downloaded'] ?? false,
+      order: json['order'],
     );
   }
 
@@ -60,6 +66,10 @@ class Episode {
       'release_date': _toString(releaseDate),
       'image_url': imageUrl,
       'duration_ms': durationMs,
+      'is_played': isPlayed,
+      'is_in_playlist': isInPlaylist,
+      'is_downloaded': isDownloaded,
+      'order': order,
     };
   }
 

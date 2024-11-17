@@ -115,6 +115,7 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
         .collection('users')
         .doc(userId)
         .collection('playlist')
+        .orderBy('order')
         .get();
 
     final playlistEpisodeIds = playlistSnapshot.docs.map((doc) => doc.id).toSet();
@@ -127,22 +128,31 @@ class LatestEpisodesScreenState extends State<LatestEpisodesScreen> {
   }
 
   Future<void> _toggleInPlaylist(Episode episode) async {
-    final userId = _currentUser!.uid;
+    final userId = _auth.currentUser!.uid;
+
     final playlistRef = _firestore
         .collection('users')
         .doc(userId)
-        .collection('playlist')
-        .doc(episode.id);
-
-    setState(() {
-      episode.isInPlaylist = !episode.isInPlaylist;
-    });
+        .collection('playlist');
 
     if (episode.isInPlaylist) {
-      await playlistRef.set(episode.toJson());
+      // Remove from playlist
+      await playlistRef.doc(episode.id).delete();
+      episode.isInPlaylist = false;
     } else {
-      await playlistRef.delete();
+      // Fetch current max order number
+      final querySnapshot = await playlistRef.orderBy('order', descending: true).limit(1).get();
+      int maxOrder = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.first['order'] as int : 0;
+
+      // Add to playlist with next order number
+      episode.isInPlaylist = true;
+      episode.order = maxOrder + 1;
+      await playlistRef.doc(episode.id).set(episode.toJson());
     }
+
+    setState(() {
+      episode.isInPlaylist = episode.isInPlaylist;
+    });
   }
 
   @override

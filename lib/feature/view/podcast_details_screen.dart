@@ -25,12 +25,10 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
   Map<String, dynamic>? _podcastDetails;
   bool _isLoading = true;
   bool _isDescriptionExpanded = false;
-  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _currentUser = _auth.currentUser;
     _fetchPodcastDetails();
   }
 
@@ -82,7 +80,7 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
                             itemCount: _podcastDetails!['episodes']['items'].length,
                             itemBuilder: (context, index) {
                               final episode = _podcastDetails!['episodes']['items'][index];
-                              return EpisodeTile(episode: Episode.fromJson(episode), backupImageUrl: widget.podcast['image_url'], onToggleInPlaylist: _toggleInPlaylist);
+                              return EpisodeTile(episode: Episode.fromJson(episode['id'], episode), backupImageUrl: widget.podcast['image_url'], onToggleInPlaylist: _toggleInPlaylist);
                             },
                           )
                         : const Text('No episodes available'),
@@ -94,28 +92,32 @@ class PodcastDetailsScreenState extends State<PodcastDetailsScreen> {
   }
 
   Future<void> _toggleInPlaylist(Episode episode) async {
-    final userId = _currentUser!.uid;
+    final userId = _auth.currentUser!.uid;
 
     final playlistRef = _firestore
         .collection('users')
         .doc(userId)
-        .collection('playlist')
-        .doc(episode.id);
-
-    setState(() {
-      episode.isInPlaylist = !episode.isInPlaylist;
-    });
+        .collection('playlist');
 
     if (episode.isInPlaylist) {
-      await playlistRef.set({
-        'title': episode.title,
-      });
+      // Remove from playlist
+      await playlistRef.doc(episode.id).delete();
+      episode.isInPlaylist = false;
     } else {
-      await playlistRef.delete();
+      // Fetch current max order number
+      final querySnapshot = await playlistRef.orderBy('order', descending: true).limit(1).get();
+      int maxOrder = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.first['order'] as int : 0;
+
+      // Add to playlist with next order number
+      episode.isInPlaylist = true;
+      episode.order = maxOrder + 1;
+      await playlistRef.doc(episode.id).set(episode.toJson());
     }
+
+    setState(() {
+      episode.isInPlaylist = episode.isInPlaylist;
+    });
   }
-
-
 
   Widget _buildDescriptionSection(String description) {
     bool isLongDescription = description.length > 150;
